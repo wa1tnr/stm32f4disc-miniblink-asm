@@ -28,24 +28,29 @@
 .global _start
 _start:
 	# Enable the GPIOD clock
-	ldr	r3, =0x40023830
+	ldr	r3, =0x40023830 @ : RCC 40023800 ;  @  : RCC_AHB1ENR RCC 30 + ;
 	ldr	r2, [r3]
-	orr	r2, #8
+	orr	r2, #4 @ @ : SETUPLED RCC @ 4 OR RCC_AHB1ENR ! ( GPIOCEN )
 	str	r2, [r3]
 	
 	# Configure pin D6 for output
-	ldr	r3, =0x40020C00
+@ ldr	r3, =0x40020C00
+	ldr	r3, =0x40020800 @ : GPIOC 40020800 ;
 	ldr	r2, [r3]
-	orr	r2, r2, #0x1000000
+@ GPIOC_MODER bit 2 set for PORTC_1:
+	orr	r2, r2, #0x4 @ orr	r2, r2, #0x1000000 @ six zeros
 	str	r2, [r3]
 	
 	# Load the address and content for the GPIO output register
-	ldr     r3, =0x40020C14
+
+@ GPIOC_ODR offset 0x14
+	ldr     r3, =0x40020814 @ ldr     r3, =0x40020C14
 	ldr	r2, [r3]
 	
 _loop:
 	# Toggle the LED on pin D6
-	eor	r2, #4096
+	@     4096    2048 1024 512 256  128 64 32 16    8 4 2 1
+	eor	r2, #2 @ eor	r2, #4096
 	str	r2, [r3]
 	
 	# Delay loop
